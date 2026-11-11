@@ -324,10 +324,10 @@ mod settings_effects;
 mod settings_essentials;
 #[path = "settings-migration.rs"]
 mod settings_migration;
-#[path = "skins-sweep.rs"]
-mod skins_sweep;
 #[path = "skins-hearth.rs"]
 mod skins_hearth;
+#[path = "skins-sweep.rs"]
+mod skins_sweep;
 mod syntax;
 mod talents;
 mod theme;
