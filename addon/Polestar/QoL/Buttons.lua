@@ -566,10 +566,32 @@ local function outlineLabel(b, auto)
 	end
 end
 
+-- What a skin's actionButton hook gets of a button (Skin API 2), made the
+-- first time a skin hooks the buttons: its parts by the API's own names
+-- (glow: the ready glow, nil until it first shows).
+local function skinParts(b)
+	local p = b.psSkinParts
+	if not p then
+		p = { ground = b.Bg, icon = b.Icon, highlight = b.Hl, cooldown = b.Cooldown, count = b.Count, hotkey = b.Hotkey,
+			label = b.Label, badge = b.Badge }
+		b.psSkinParts = p
+	end
+	p.glow = b.psGlow
+	return p
+end
+
+-- The skin in use's own touch over Polestar's face, under the mouse or not.
+local function skinHook(b)
+	local T = Theme()
+	if T and T.SkinHooks and T.SkinHooks("actionButton") then
+		T.SkinHook("actionButton", b, b.psKind, skinParts(b), b.psHover and true or false)
+	end
+end
+
 -- The look settings and the theme's colours on a face: backing, border, the
 -- icon's inset, the texts (size, outline, which show), the small icons, the
--- glow. Plain regions, so at any time, in combat too; size and place are
--- protected (place()).
+-- glow; then the skin's hook. Plain regions, so at any time, in combat too;
+-- size and place are protected (place()).
 local paintTarget
 local function paintFace(b)
 	local T = Theme()
@@ -613,6 +635,7 @@ local function paintFace(b)
 		outlineLabel(b, false)
 		placeLabel(b)
 	end
+	skinHook(b)
 end
 Buttons.Paint = paintFace
 
@@ -647,6 +670,7 @@ local function newButton(name, kind, onEnter)
 	b:SetScript("OnEnter", function(self)
 		self.psHover = true
 		paintBorder(self, true)
+		skinHook(self)
 		applyAlpha(self)
 		hoverStart(self)
 		if GameTooltip and onEnter then
@@ -658,6 +682,7 @@ local function newButton(name, kind, onEnter)
 	b:SetScript("OnLeave", function(self)
 		self.psHover = nil
 		paintBorder(self, false)
+		skinHook(self)
 		applyAlpha(self)
 		hoverEnd(self)
 		if GameTooltip and GameTooltip:GetOwner() == self then GameTooltip:Hide() end
